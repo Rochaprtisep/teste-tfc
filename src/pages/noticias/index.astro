@@ -1,0 +1,21 @@
+---
+import Base from '../../layouts/Base.astro';
+import NewsCard from '../../components/NewsCard.astro';
+import { getNoticias } from '../../lib/content';
+
+const noticias = await getNoticias();
+---
+
+<Base title="Notícias" description="Novidades, competições e eventos da equipa.">
+  <div class="container page-header">
+    <p class="eyebrow">Notícias</p>
+    <h1>O que temos feito</h1>
+    <p>Competições, eventos, testes e tudo o que acontece na equipa.</p>
+  </div>
+  <div class="container section" style="padding-top: 1.5rem">
+    {noticias.length === 0 && <p class="empty">Ainda não há notícias publicadas.</p>}
+    <div class="grid">
+      {noticias.map((n) => <NewsCard slug={n.slug} {...n.entry} />)}
+    </div>
+  </div>
+</Base>

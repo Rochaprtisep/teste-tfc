@@ -1,0 +1,40 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { getDefinicoes } from '../lib/content';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string | null;
+}
+
+const site = await getDefinicoes();
+const { title, description = site.descricao, image } = Astro.props;
+const fullTitle = title ? `${title} · ${site.nome}` : site.nome;
+const ogImage = image ? new URL(image, Astro.site).href : undefined;
+---
+
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    {description && <meta name="description" content={description} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <meta property="og:title" content={fullTitle} />
+    {description && <meta property="og:description" content={description} />}
+    {ogImage && <meta property="og:image" content={ogImage} />}
+    <meta property="og:type" content="website" />
+  </head>
+  <body>
+    <Header site={site} />
+    <main>
+      <slot />
+    </main>
+    <Footer site={site} />
+  </body>
+</html>

@@ -1,0 +1,81 @@
+---
+interface Props {
+  site: {
+    nome: string;
+    email: string;
+    instagram: string | null;
+    linkedin: string | null;
+    facebook: string | null;
+    youtube: string | null;
+  };
+}
+const { site } = Astro.props;
+
+const redes = [
+  { label: 'Instagram', href: site.instagram },
+  { label: 'LinkedIn', href: site.linkedin },
+  { label: 'Facebook', href: site.facebook },
+  { label: 'YouTube', href: site.youtube },
+].filter((r) => r.href);
+---
+
+<footer class="footer">
+  <div class="container footer__inner">
+    <div>
+      <strong>{site.nome}</strong>
+      <p class="muted small">Instituto Superior Técnico, Universidade de Lisboa</p>
+    </div>
+    <div class="footer__links">
+      {site.email && <a href={`mailto:${site.email}`}>{site.email}</a>}
+      {
+        redes.map((r) => (
+          <a href={r.href!} target="_blank" rel="noopener noreferrer">
+            {r.label}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+  <div class="container footer__bottom muted small">
+    © {new Date().getFullYear()} {site.nome}
+  </div>
+</footer>
+
+<style>
+  .footer {
+    background: var(--ink);
+    color: #e9edf0;
+    padding-block: 2.5rem 1.5rem;
+    margin-top: 3rem;
+  }
+  .footer .muted {
+    color: #9aa6b2;
+  }
+  .footer__inner {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+  .footer__inner p {
+    margin: 0.25rem 0 0;
+  }
+  .footer__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.25rem;
+    align-items: flex-start;
+  }
+  .footer a {
+    color: #e9edf0;
+    text-decoration: none;
+  }
+  .footer a:hover {
+    text-decoration: underline;
+  }
+  .footer__bottom {
+    border-top: 1px solid rgb(255 255 255 / 0.1);
+    margin-top: 2rem;
+    padding-top: 1rem;
+  }
+</style>

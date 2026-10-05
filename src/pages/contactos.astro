@@ -1,0 +1,96 @@
+---
+import Base from '../layouts/Base.astro';
+import { reader, getDefinicoes } from '../lib/content';
+
+const site = await getDefinicoes();
+const c = await reader.singletons.contactos.readOrThrow();
+
+const redes = [
+  { label: 'Instagram', href: site.instagram },
+  { label: 'LinkedIn', href: site.linkedin },
+  { label: 'Facebook', href: site.facebook },
+  { label: 'YouTube', href: site.youtube },
+].filter((r) => r.href);
+---
+
+<Base title="Contactos" description={`Como entrar em contacto com a ${site.nomeCurto}.`}>
+  <div class="container page-header">
+    <p class="eyebrow">Contactos</p>
+    <h1>Fala connosco</h1>
+    {c.introducao && <p>{c.introducao}</p>}
+  </div>
+
+  <div class="container section" style="padding-top: 2rem">
+    <div class="grid" style="--min: 280px">
+      {
+        site.email && (
+          <div class="box">
+            <h2>Email</h2>
+            <a href={`mailto:${site.email}`}>{site.email}</a>
+            {c.contactosExtra.length > 0 && (
+              <ul>
+                {c.contactosExtra.map((x) => (
+                  <li>
+                    <span class="muted">{x.area}:</span> <a href={`mailto:${x.email}`}>{x.email}</a>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        )
+      }
+      {
+        c.morada && (
+          <div class="box">
+            <h2>Onde estamos</h2>
+            <p style="white-space: pre-line; margin: 0">{c.morada}</p>
+            {c.mapaUrl && (
+              <a href={c.mapaUrl} target="_blank" rel="noopener noreferrer">
+                Ver no mapa →
+              </a>
+            )}
+          </div>
+        )
+      }
+      {
+        redes.length > 0 && (
+          <div class="box">
+            <h2>Redes sociais</h2>
+            <ul>
+              {redes.map((r) => (
+                <li>
+                  <a href={r.href!} target="_blank" rel="noopener noreferrer">
+                    {r.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+  </div>
+</Base>
+
+<style>
+  .box {
+    padding: 1.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  .box h2 {
+    font-size: 1.1rem;
+    margin: 0 0 0.25rem;
+  }
+  .box ul {
+    list-style: none;
+    padding: 0;
+    margin: 0.5rem 0 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+  }
+</style>

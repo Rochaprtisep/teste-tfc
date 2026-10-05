@@ -1,0 +1,98 @@
+---
+import Base from '../layouts/Base.astro';
+import { reader, getDefinicoes, DEPARTAMENTOS } from '../lib/content';
+
+const site = await getDefinicoes();
+const membros = (await reader.collections.membros.all())
+  .map((m) => m.entry)
+  .filter((m) => m.epoca.trim() === site.epocaAtual.trim());
+
+const grupos = DEPARTAMENTOS.map((d) => ({
+  ...d,
+  membros: membros
+    .filter((m) => m.departamento === d.value)
+    .sort((a, b) => (a.ordem ?? 10) - (b.ordem ?? 10) || a.nome.localeCompare(b.nome, 'pt')),
+})).filter((g) => g.membros.length > 0);
+
+const iniciais = (nome: string) =>
+  nome
+    .split(/\s+/)
+    .filter(Boolean)
+    .map((p) => p[0])
+    .filter((_, i, a) => i === 0 || i === a.length - 1)
+    .join('')
+    .toUpperCase();
+---
+
+<Base title="Equipa" description={`A equipa ${site.nomeCurto} na época ${site.epocaAtual}.`}>
+  <div class="container page-header">
+    <p class="eyebrow">Época {site.epocaAtual}</p>
+    <h1>A nossa equipa</h1>
+    <p>{membros.length} estudantes do Técnico, organizados por departamento.</p>
+  </div>
+
+  <div class="container">
+    {grupos.length === 0 && <p class="empty">Ainda não há membros registados para esta época.</p>}
+    {
+      grupos.map((g) => (
+        <section class="dept">
+          <h2>{g.label}</h2>
+          <div class="grid" style="--min: 190px">
+            {g.membros.map((m) => (
+              <article class="member">
+                {m.foto ? (
+                  <img src={m.foto} alt={m.nome} loading="lazy" />
+                ) : (
+                  <div class="placeholder-img" aria-hidden="true">{iniciais(m.nome)}</div>
+                )}
+                <h3>{m.nome}</h3>
+                {m.cargo && <p class="role">{m.cargo}</p>}
+                {m.curso && <p class="muted small">{m.curso}</p>}
+                {m.linkedin && (
+                  <a class="small" href={m.linkedin} target="_blank" rel="noopener noreferrer">
+                    LinkedIn
+                  </a>
+                )}
+              </article>
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  .dept {
+    padding-block: 1.5rem 2rem;
+  }
+  .dept h2 {
+    font-size: 1.35rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.5rem;
+  }
+  .member {
+    text-align: center;
+  }
+  .member img,
+  .member .placeholder-img {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    border-radius: var(--radius);
+    margin-bottom: 0.75rem;
+  }
+  .member h3 {
+    font-size: 1.05rem;
+    margin: 0;
+  }
+  .member p {
+    margin: 0.1rem 0;
+  }
+  .role {
+    color: var(--accent);
+    font-weight: 500;
+    font-size: 0.95rem;
+  }
+</style>

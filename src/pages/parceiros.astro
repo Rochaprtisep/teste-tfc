@@ -1,0 +1,101 @@
+---
+import Base from '../layouts/Base.astro';
+import { reader, getDefinicoes, NIVEIS_PARCEIRO } from '../lib/content';
+
+const site = await getDefinicoes();
+const parceiros = (await reader.collections.parceiros.all()).map((p) => p.entry);
+
+const niveis = NIVEIS_PARCEIRO.map((n) => ({
+  ...n,
+  parceiros: parceiros
+    .filter((p) => p.nivel === n.value)
+    .sort((a, b) => (a.ordem ?? 10) - (b.ordem ?? 10) || a.nome.localeCompare(b.nome, 'pt')),
+})).filter((n) => n.parceiros.length > 0);
+---
+
+<Base title="Parceiros" description="As empresas e instituições que tornam o nosso projeto possível.">
+  <div class="container page-header">
+    <p class="eyebrow">Parceiros</p>
+    <h1>Quem nos apoia</h1>
+    <p>Sem os nossos parceiros, nada disto seria possível. Obrigado!</p>
+  </div>
+
+  <div class="container">
+    {niveis.length === 0 && <p class="empty">Ainda não há parceiros registados.</p>}
+    {
+      niveis.map((n) => (
+        <section class={`tier tier--${n.value}`}>
+          <h2>{n.label}</h2>
+          <div class="logos">
+            {n.parceiros.map((p) => {
+              const Tag = p.website ? 'a' : 'div';
+              return (
+                <Tag class="logo" href={p.website || undefined} target={p.website ? '_blank' : undefined} rel="noopener noreferrer" title={p.nome}>
+                  {p.logo ? <img src={p.logo} alt={p.nome} loading="lazy" /> : <span>{p.nome}</span>}
+                </Tag>
+              );
+            })}
+          </div>
+        </section>
+      ))
+    }
+
+    <section class="cta">
+      <h2>Quer apoiar-nos?</h2>
+      <p class="muted">Temos pacotes de parceria com visibilidade no protótipo, nas redes e nos eventos.</p>
+      <a class="btn" href={site.email ? `mailto:${site.email}?subject=Parceria` : '/contactos'}>Fale connosco</a>
+    </section>
+  </div>
+</Base>
+
+<style>
+  .tier {
+    padding-block: 1.5rem 2rem;
+  }
+  .tier h2 {
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+    font-weight: 600;
+    margin-bottom: 1.25rem;
+  }
+  .logos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(var(--size, 170px), 1fr));
+    gap: 1rem;
+  }
+  .tier--principal .logos {
+    --size: 280px;
+  }
+  .tier--apoio .logos {
+    --size: 140px;
+  }
+  .logo {
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 2;
+    padding: 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--bg);
+    text-decoration: none;
+    color: var(--ink);
+    font-weight: 700;
+    text-align: center;
+    transition: box-shadow 0.15s;
+  }
+  a.logo:hover {
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+  }
+  .logo img {
+    max-height: 100%;
+    width: auto;
+    object-fit: contain;
+  }
+  .cta {
+    margin-block: 2rem;
+    padding: clamp(1.5rem, 4vw, 3rem);
+    border-radius: calc(var(--radius) * 1.5);
+    background: var(--accent-soft);
+    text-align: center;
+  }
+</style>

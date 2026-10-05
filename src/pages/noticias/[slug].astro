@@ -1,0 +1,51 @@
+---
+import Base from '../../layouts/Base.astro';
+import { reader, renderMarkdoc, formatDate } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const slugs = await reader.collections.noticias.list();
+  return slugs.map((slug) => ({ params: { slug } }));
+}
+
+const { slug } = Astro.params;
+const noticia = await reader.collections.noticias.readOrThrow(slug!);
+const html = renderMarkdoc((await noticia.conteudo()).node);
+---
+
+<Base title={noticia.titulo} description={noticia.resumo} image={noticia.capa}>
+  <article class="container article">
+    <a href="/noticias" class="small">← Todas as notícias</a>
+    <header>
+      <time class="eyebrow" datetime={noticia.data}>{formatDate(noticia.data)}</time>
+      <h1>{noticia.titulo}</h1>
+      {noticia.resumo && <p class="lead">{noticia.resumo}</p>}
+    </header>
+    {noticia.capa && <img class="cover" src={noticia.capa} alt="" />}
+    <div class="prose" set:html={html} />
+  </article>
+</Base>
+
+<style>
+  .article {
+    max-width: 780px;
+    padding-block: 2.5rem 1rem;
+  }
+  header {
+    margin-top: 1.5rem;
+  }
+  .eyebrow {
+    display: block;
+  }
+  .lead {
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+  }
+  .cover {
+    width: 100%;
+    border-radius: var(--radius);
+    margin-block: 1.5rem 2rem;
+  }
+  .prose {
+    font-size: 1.08rem;
+  }
+</style>

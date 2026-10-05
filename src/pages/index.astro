@@ -1,0 +1,176 @@
+---
+import Base from '../layouts/Base.astro';
+import NewsCard from '../components/NewsCard.astro';
+import { reader, getNoticias } from '../lib/content';
+
+const inicio = await reader.singletons.inicio.readOrThrow();
+const noticias = (await getNoticias()).slice(0, 3);
+const prototipos = (await reader.collections.prototipos.all()).sort((a, b) => b.entry.ano - a.entry.ano);
+const atual = prototipos[0];
+---
+
+<Base image={inicio.imagem}>
+  <section class="hero">
+    <div class="container hero__inner">
+      <div>
+        <h1>{inicio.titulo}</h1>
+        {inicio.subtitulo && <p class="hero__sub">{inicio.subtitulo}</p>}
+        <div class="hero__actions">
+          {inicio.botaoTexto && <a class="btn" href={inicio.botaoLink || '/equipa'}>{inicio.botaoTexto}</a>}
+          <a class="btn btn--ghost" href="/garagem">Ver protótipos</a>
+        </div>
+      </div>
+      {inicio.imagem ? <img class="hero__img" src={inicio.imagem} alt="" /> : <div class="hero__img placeholder-img">TFC</div>}
+    </div>
+  </section>
+
+  {
+    inicio.numeros.length > 0 && (
+      <section class="container stats">
+        {inicio.numeros.map((n) => (
+          <div>
+            <strong>{n.valor}</strong>
+            <span>{n.legenda}</span>
+          </div>
+        ))}
+      </section>
+    )
+  }
+
+  {
+    inicio.sobreTexto && (
+      <section class="section">
+        <div class="container about">
+          <p class="eyebrow">Sobre nós</p>
+          <h2>{inicio.sobreTitulo}</h2>
+          {inicio.sobreTexto.split(/\n\s*\n/).map((p) => <p>{p}</p>)}
+        </div>
+      </section>
+    )
+  }
+
+  {
+    atual && (
+      <section class="section section--alt">
+        <div class="container feature">
+          {atual.entry.imagem ? (
+            <img src={atual.entry.imagem} alt={atual.entry.nome} loading="lazy" />
+          ) : (
+            <div class="placeholder-img">{atual.entry.nome}</div>
+          )}
+          <div>
+            <p class="eyebrow">Na garagem · {atual.entry.ano}</p>
+            <h2>{atual.entry.nome}</h2>
+            {atual.entry.resumo && <p class="muted">{atual.entry.resumo}</p>}
+            <a class="btn btn--ghost" href="/garagem">Conhecer os protótipos</a>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    noticias.length > 0 && (
+      <section class="section">
+        <div class="container">
+          <div class="section-head">
+            <h2>Últimas notícias</h2>
+            <a href="/noticias">Ver todas →</a>
+          </div>
+          <div class="grid">
+            {noticias.map((n) => (
+              <NewsCard slug={n.slug} {...n.entry} />
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+</Base>
+
+<style>
+  .hero {
+    padding-block: clamp(3rem, 8vw, 6rem);
+    background: radial-gradient(1200px 400px at 80% 0%, var(--accent-soft), transparent 70%);
+  }
+  .hero__inner {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+  }
+  .hero__sub {
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+    max-width: 50ch;
+  }
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+  .hero__img {
+    border-radius: calc(var(--radius) * 1.5);
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    width: 100%;
+  }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+    padding-block: 1rem;
+  }
+  .stats div {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    border-radius: var(--radius);
+    background: var(--bg-alt);
+  }
+  .stats strong {
+    font-size: 2rem;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+  .stats span {
+    color: var(--ink-soft);
+  }
+  .about {
+    max-width: 760px;
+  }
+  .about p:not(.eyebrow) {
+    font-size: 1.1rem;
+    color: var(--ink-soft);
+  }
+  .feature {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+  }
+  .feature img,
+  .feature .placeholder-img {
+    border-radius: var(--radius);
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    width: 100%;
+  }
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .section-head h2 {
+    margin: 0;
+  }
+  @media (max-width: 820px) {
+    .hero__inner,
+    .feature {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

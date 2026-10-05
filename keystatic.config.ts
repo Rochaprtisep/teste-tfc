@@ -34,8 +34,14 @@ export const NIVEIS_PARCEIRO = [
   { label: 'Apoio', value: 'apoio' },
 ] as const;
 
+// Em `npm run dev` edita os ficheiros locais; em produção grava no GitHub.
+// Para testar o modo GitHub localmente: PUBLIC_KEYSTATIC_GITHUB=true no .env
+const useGithub = import.meta.env.PROD || import.meta.env.PUBLIC_KEYSTATIC_GITHUB === 'true';
+
 export default config({
-  storage: { kind: 'local' },
+  storage: useGithub
+    ? { kind: 'github', repo: { owner: 'Rochaprtisep', name: 'teste-tfc' } }
+    : { kind: 'local' },
   ui: {
     brand: { name: 'TFC — Painel' },
     navigation: {

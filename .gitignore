@@ -4,11 +4,13 @@ node_modules/
 # Build e cache do Astro
 dist/
 .astro/
+.wrangler/
 
 # Variáveis de ambiente (tokens do Keystatic/GitHub, etc.)
 .env
 .env.*
 !.env.example
+.dev.vars*
 
 # Logs
 npm-debug.log*

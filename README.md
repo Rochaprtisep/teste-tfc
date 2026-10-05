@@ -36,14 +36,42 @@ Os membros de épocas anteriores ficam guardados mas deixam de aparecer na pági
 
 As listas estão em `keystatic.config.ts` (`DEPARTAMENTOS`, `NIVEIS_PARCEIRO`). A ordem nessa lista é a ordem no site.
 
-## Publicação (próximos passos)
+## Publicação e painel online
 
-Neste momento o painel funciona em **modo local**: edita os ficheiros no teu computador. Para os editores usarem o painel online, sem instalar nada:
+O site é pré-renderizado (HTML estático) e alojado no **Cloudflare Workers**.
+Só o painel (`/keystatic` e `/api/keystatic/*`) corre como código no servidor.
 
-1. Criar um repositório no GitHub e fazer push deste projeto.
-2. Ligar o repositório ao **Cloudflare Pages** (build: `npm run build`, pasta: `dist`). Cada commit publica o site.
-3. Mudar o `storage` em `keystatic.config.ts` para `{ kind: 'github', repo: 'organizacao/repositorio' }`, ou usar o Keystatic Cloud.
-   Como o painel precisa de rotas de servidor, o deploy online do `/keystatic` requer um adapter do Astro. Ver a documentação do Keystatic sobre o modo GitHub.
-4. Pedir à DSI do Técnico um registo CNAME de `tfcell.tecnico.ulisboa.pt` para o novo alojamento.
+- Em `npm run dev`, o painel edita os **ficheiros locais**.
+- Em produção, o painel grava no **GitHub** (`Rochaprtisep/teste-tfc`). Cada "Guardar" cria um commit, e o Cloudflare reconstrói o site.
 
-Com o modo GitHub, cada "Guardar" no painel cria um commit, e o Cloudflare reconstrói o site em cerca de um minuto.
+### 1. Criar a GitHub App (uma vez)
+
+1. Fazer push do projeto para o GitHub.
+2. Criar um ficheiro `.env` com `PUBLIC_KEYSTATIC_GITHUB=true` e (re)iniciar `npm run dev`.
+3. Abrir http://127.0.0.1:4321/keystatic e seguir o assistente:
+   - dar um nome à app (ex.: `tfc-keystatic`);
+   - indicar o URL de produção, para registar o callback do login;
+   - criar a app no GitHub.
+   O assistente acrescenta ao `.env` as chaves `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET` e `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`.
+4. Reiniciar `npm run dev`, instalar a app no repositório (o painel mostra o link) e fazer login.
+
+O `.env` nunca vai para o Git. Guarda estas chaves num sítio seguro.
+
+### 2. Ligar ao Cloudflare
+
+1. No Cloudflare: **Workers & Pages → Create → Import a repository** e escolher o repositório.
+2. Build command: `npm run build` · Deploy command: `npx wrangler deploy`.
+3. Em **Settings → Variables and Secrets**:
+   - `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`, como variável de **build**;
+   - `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET` e `KEYSTATIC_SECRET`, como **secrets** do Worker (runtime).
+4. Se o URL final mudar (domínio próprio), acrescentar na GitHub App o callback
+   `https://<domínio>/api/keystatic/github/oauth/callback`.
+
+### 3. Domínio
+
+Pedir à DSI do Técnico um registo CNAME de `tfcell.tecnico.ulisboa.pt` para o Worker.
+
+### Dar acesso a editores
+
+Cada editor precisa de uma conta GitHub com acesso de escrita ao repositório: **Settings → Collaborators**. Para editar, entra em `https://<domínio>/keystatic`.
+

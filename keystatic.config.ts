@@ -34,14 +34,17 @@ export const NIVEIS_PARCEIRO = [
   { label: 'Apoio', value: 'apoio' },
 ] as const;
 
-// Em `npm run dev` edita os ficheiros locais; em produção grava no GitHub.
-// Para testar o modo GitHub localmente: PUBLIC_KEYSTATIC_GITHUB=true no .env
-const useGithub = import.meta.env.PROD || import.meta.env.PUBLIC_KEYSTATIC_GITHUB === 'true';
+// Em `npm run dev` edita os ficheiros locais; em produção usa o Keystatic Cloud,
+// que grava no GitHub em nome dos editores (não precisam de conta GitHub).
+// Para testar o modo Cloud localmente: PUBLIC_KEYSTATIC_CLOUD=true no .env
+const useCloud = import.meta.env.PROD || import.meta.env.PUBLIC_KEYSTATIC_CLOUD === 'true';
+
+// Projeto em https://keystatic.cloud, no formato "equipa/projeto".
+const CLOUD_PROJECT = 'tfcell/teste-tfc';
 
 export default config({
-  storage: useGithub
-    ? { kind: 'github', repo: { owner: 'Rochaprtisep', name: 'teste-tfc' } }
-    : { kind: 'local' },
+  storage: useCloud ? { kind: 'cloud' } : { kind: 'local' },
+  cloud: { project: CLOUD_PROJECT },
   ui: {
     brand: { name: 'TFC — Painel' },
     navigation: {

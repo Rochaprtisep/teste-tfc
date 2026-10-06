@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
 import { getDefinicoes, getMembros, DEPARTAMENTOS } from '../lib/content';
 
 const site = await getDefinicoes();
@@ -23,34 +24,52 @@ const iniciais = (nome: string) =>
 ---
 
 <Base title="Equipa" description={`A equipa ${site.nomeCurto} na época ${site.epocaAtual}.`}>
-  <div class="container page-header">
-    <p class="eyebrow">Época {site.epocaAtual}</p>
-    <h1>A nossa equipa</h1>
-    <p>{membros.length} estudantes do Técnico, organizados por departamento.</p>
-  </div>
+  <PageHeader
+    eyebrow={`Época ${site.epocaAtual}`}
+    title="A nossa equipa"
+    text={`${membros.length} estudantes do Técnico, organizados em ${grupos.length} departamentos.`}
+  >
+    {
+      grupos.length > 1 && (
+        <nav class="depts" aria-label="Departamentos" data-reveal style="--delay: 0.18s">
+          {grupos.map((g) => (
+            <a href={`#${g.value}`}>{g.title}</a>
+          ))}
+        </nav>
+      )
+    }
+  </PageHeader>
 
-  <div class="container">
+  <div class="container section">
     {grupos.length === 0 && <p class="empty">Ainda não há membros registados para esta época.</p>}
     {
-      grupos.map((g) => (
-        <section class="dept">
-          <h2>{g.title}</h2>
-          <div class="grid" style="--min: 190px">
-            {g.membros.map((m) => (
-              <article class="member">
-                {m.foto ? (
-                  <img src={m.foto} alt={m.nome} loading="lazy" />
-                ) : (
-                  <div class="placeholder-img" aria-hidden="true">{iniciais(m.nome)}</div>
-                )}
+      grupos.map((g, gi) => (
+        <section class="dept" id={g.value}>
+          <div class="dept__head" data-reveal>
+            <span class="dept__num">{String(gi + 1).padStart(2, '0')}</span>
+            <h2>{g.title}</h2>
+            <span class="dept__count">{g.membros.length} {g.membros.length === 1 ? 'membro' : 'membros'}</span>
+          </div>
+          <div class="grid members" style="--min: 210px">
+            {g.membros.map((m, i) => (
+              <article class="member" data-reveal style={`--delay: ${(i % 4) * 0.06}s`}>
+                <div class="member__photo">
+                  {m.foto ? (
+                    <img src={m.foto} alt={m.nome} loading="lazy" />
+                  ) : (
+                    <div class="placeholder-img" aria-hidden="true">
+                      {iniciais(m.nome)}
+                    </div>
+                  )}
+                  {m.linkedin && (
+                    <a class="member__in" href={m.linkedin} target="_blank" rel="noopener noreferrer" aria-label={`LinkedIn de ${m.nome}`}>
+                      in
+                    </a>
+                  )}
+                </div>
                 <h3>{m.nome}</h3>
-                {m.cargo && <p class="role">{m.cargo}</p>}
+                {m.cargo && <p class="member__role">{m.cargo}</p>}
                 {m.curso && <p class="muted small">{m.curso}</p>}
-                {m.linkedin && (
-                  <a class="small" href={m.linkedin} target="_blank" rel="noopener noreferrer">
-                    LinkedIn
-                  </a>
-                )}
               </article>
             ))}
           </div>
@@ -61,36 +80,114 @@ const iniciais = (nome: string) =>
 </Base>
 
 <style>
+  .depts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 2rem;
+  }
+  .depts a {
+    padding: 0.45rem 0.9rem;
+    border: 1px solid var(--dark-line);
+    border-radius: 999px;
+    color: var(--on-dark);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .depts a:hover {
+    border-color: var(--accent);
+    background: rgb(0 160 223 / 0.12);
+  }
   .dept {
-    padding-block: 1.5rem 2rem;
+    scroll-margin-top: calc(var(--header-h) + 1rem);
   }
-  .dept h2 {
-    font-size: 1.35rem;
-    padding-bottom: 0.6rem;
-    border-bottom: 1px solid var(--line);
-    margin-bottom: 1.5rem;
+  .dept + .dept {
+    margin-top: clamp(3rem, 7vw, 5rem);
   }
-  .member {
-    text-align: center;
+  .dept__head {
+    display: flex;
+    align-items: baseline;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 2px solid var(--ink);
   }
-  .member img,
-  .member .placeholder-img {
-    width: 100%;
-    aspect-ratio: 1;
-    object-fit: cover;
+  .dept__head h2 {
+    margin: 0;
+    font-size: clamp(1.5rem, 3vw, 2.2rem);
+  }
+  .dept__num {
+    font-family: var(--font-display);
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .dept__count {
+    margin-left: auto;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--ink-soft);
+  }
+  @media (max-width: 560px) {
+    .members {
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem 0.75rem;
+    }
+    .member h3 {
+      font-size: 1rem;
+    }
+  }
+  .member__photo {
+    position: relative;
+    overflow: hidden;
     border-radius: var(--radius);
-    margin-bottom: 0.75rem;
+    margin-bottom: 1rem;
+    background: var(--bg-alt);
+  }
+  .member__photo img,
+  .member__photo .placeholder-img {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+  .member:hover .member__photo img {
+    transform: scale(1.04);
+  }
+  .member__photo .placeholder-img {
+    font-size: 2.4rem;
+  }
+  .member__in {
+    position: absolute;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius);
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .member__in:hover {
+    background: var(--accent-strong);
   }
   .member h3 {
-    font-size: 1.05rem;
     margin: 0;
+    font-size: 1.15rem;
   }
   .member p {
-    margin: 0.1rem 0;
+    margin: 0.15rem 0 0;
   }
-  .role {
-    color: var(--accent);
-    font-weight: 500;
-    font-size: 0.95rem;
+  .member__role {
+    color: var(--accent-strong);
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 </style>

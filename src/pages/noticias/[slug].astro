@@ -12,39 +12,59 @@ const html = renderRico(noticia.conteudo);
 ---
 
 <Base title={noticia.titulo} description={noticia.resumo} image={noticia.capa}>
-  <article class="container article">
-    <a href="/noticias" class="small">← Todas as notícias</a>
-    <header>
+  <header class="page-header">
+    <div class="container article-head">
+      <a href="/noticias" class="back">← Todas as notícias</a>
       <time class="eyebrow" datetime={noticia.data}>{formatDate(noticia.data)}</time>
       <h1>{noticia.titulo}</h1>
-      {noticia.resumo && <p class="lead">{noticia.resumo}</p>}
-    </header>
+      {noticia.resumo && <p>{noticia.resumo}</p>}
+    </div>
+  </header>
+
+  <article class="container article">
     {noticia.capa && <img class="cover" src={noticia.capa} alt="" />}
     <div class="prose" set:html={html} />
   </article>
 </Base>
 
 <style>
-  .article {
-    max-width: 780px;
-    padding-block: 2.5rem 1rem;
+  .article-head {
+    max-width: 860px;
   }
-  header {
-    margin-top: 1.5rem;
+  .article-head h1 {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+  }
+  .back {
+    display: inline-block;
+    margin-bottom: 2rem;
+    color: var(--on-dark-soft);
+    text-decoration: none;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-weight: 600;
+  }
+  .back:hover {
+    color: var(--accent);
   }
   .eyebrow {
-    display: block;
+    display: flex;
   }
-  .lead {
-    font-size: 1.2rem;
-    color: var(--ink-soft);
+  .article {
+    max-width: 860px;
+    padding-block: 0 clamp(3rem, 8vw, 5rem);
   }
   .cover {
     width: 100%;
     border-radius: var(--radius);
-    margin-block: 1.5rem 2rem;
+    margin-top: clamp(-2rem, -3vw, -1rem);
+    position: relative;
+    margin-bottom: 2.5rem;
   }
   .prose {
-    font-size: 1.08rem;
+    padding-top: 2.5rem;
+  }
+  .cover + .prose {
+    padding-top: 0;
   }
 </style>

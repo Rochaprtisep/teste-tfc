@@ -12,15 +12,11 @@ const { slug, titulo, data, capa, resumo } = Astro.props;
 ---
 
 <a class="card" href={`/noticias/${slug}`}>
-  {
-    capa ? (
-      <img class="card__img" src={capa} alt="" loading="lazy" />
-    ) : (
-      <div class="card__img placeholder-img">TFC</div>
-    )
-  }
+  <div class="card__media">
+    {capa ? <img class="card__img" src={capa} alt="" loading="lazy" /> : <div class="card__img placeholder-img">TFC</div>}
+  </div>
   <div class="card__body">
-    <time class="muted small" datetime={data}>{formatDate(data)}</time>
+    <time class="card__date" datetime={data}>{formatDate(data)}</time>
     <h3>{titulo}</h3>
     {resumo && <p class="muted small" style="margin:0">{resumo}</p>}
   </div>

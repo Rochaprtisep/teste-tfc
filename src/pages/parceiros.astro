@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import PageHeader from '../components/PageHeader.astro';
 import { getDefinicoes, getParceiros, NIVEIS_PARCEIRO } from '../lib/content';
 
 const site = await getDefinicoes();
@@ -14,19 +15,15 @@ const niveis = NIVEIS_PARCEIRO.map((n) => ({
 ---
 
 <Base title="Parceiros" description="As empresas e instituições que tornam o nosso projeto possível.">
-  <div class="container page-header">
-    <p class="eyebrow">Parceiros</p>
-    <h1>Quem nos apoia</h1>
-    <p>Sem os nossos parceiros, nada disto seria possível. Obrigado!</p>
-  </div>
+  <PageHeader eyebrow="Parceiros" title="Quem nos apoia" text="Sem os nossos parceiros, nada disto seria possível. Obrigado!" />
 
-  <div class="container">
+  <div class="container section">
     {niveis.length === 0 && <p class="empty">Ainda não há parceiros registados.</p>}
     {
       niveis.map((n) => (
         <section class={`tier tier--${n.value}`}>
-          <h2>{n.title}</h2>
-          <div class="logos">
+          <h2 data-reveal>{n.title}</h2>
+          <div class="logos" data-reveal style="--delay: 0.08s">
             {n.parceiros.map((p) => {
               const Tag = p.website ? 'a' : 'div';
               return (
@@ -39,63 +36,83 @@ const niveis = NIVEIS_PARCEIRO.map((n) => ({
         </section>
       ))
     }
-
-    <section class="cta">
-      <h2>Quer apoiar-nos?</h2>
-      <p class="muted">Temos pacotes de parceria com visibilidade no protótipo, nas redes e nos eventos.</p>
-      <a class="btn" href={site.email ? `mailto:${site.email}?subject=Parceria` : '/contactos'}>Fale connosco</a>
-    </section>
   </div>
+
+  <section class="section section--dark cta">
+    <div class="container cta__inner" data-reveal>
+      <div>
+        <p class="eyebrow">Parcerias</p>
+        <h2>Quer apoiar-nos?</h2>
+        <p class="muted">Temos pacotes de parceria com visibilidade no protótipo, nas redes e nos eventos.</p>
+      </div>
+      <a class="btn" href={site.email ? `mailto:${site.email}?subject=Parceria` : '/contactos'}>Fale connosco</a>
+    </div>
+  </section>
 </Base>
 
 <style>
-  .tier {
-    padding-block: 1.5rem 2rem;
+  .tier + .tier {
+    margin-top: clamp(3rem, 6vw, 4.5rem);
   }
   .tier h2 {
-    font-size: 1.2rem;
+    font-size: 0.8rem;
+    font-family: var(--font);
+    letter-spacing: 0.16em;
     color: var(--ink-soft);
-    font-weight: 600;
-    margin-bottom: 1.25rem;
+    padding-bottom: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--line);
   }
   .logos {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(var(--size, 170px), 1fr));
-    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(var(--size, 200px), 1fr));
+    padding: 0 1px 1px 0;
   }
   .tier--principal .logos {
-    --size: 280px;
+    --size: 320px;
   }
   .tier--apoio .logos {
-    --size: 140px;
+    --size: 160px;
   }
   .logo {
+    border: 1px solid var(--line);
+    margin: 0 -1px -1px 0;
     display: grid;
     place-items: center;
     aspect-ratio: 3 / 2;
-    padding: 1.25rem;
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
+    padding: 1.5rem;
     background: var(--bg);
     text-decoration: none;
     color: var(--ink);
+    font-family: var(--font-display);
     font-weight: 700;
+    font-size: 1.1rem;
     text-align: center;
-    transition: box-shadow 0.15s;
+    transition: background 0.2s;
+  }
+  .tier--principal .logo {
+    font-size: 1.5rem;
   }
   a.logo:hover {
-    box-shadow: 0 8px 24px rgb(0 0 0 / 0.08);
+    background: var(--bg-alt);
   }
   .logo img {
     max-height: 100%;
     width: auto;
     object-fit: contain;
   }
-  .cta {
-    margin-block: 2rem;
-    padding: clamp(1.5rem, 4vw, 3rem);
-    border-radius: calc(var(--radius) * 1.5);
-    background: var(--accent-soft);
-    text-align: center;
+  .cta__inner {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    justify-content: space-between;
+    gap: 2rem;
+  }
+  .cta h2 {
+    margin-bottom: 0.4em;
+  }
+  .cta p.muted {
+    margin: 0;
+    max-width: 50ch;
   }
 </style>

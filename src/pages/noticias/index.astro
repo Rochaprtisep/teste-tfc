@@ -1,21 +1,25 @@
 ---
 import Base from '../../layouts/Base.astro';
 import NewsCard from '../../components/NewsCard.astro';
+import PageHeader from '../../components/PageHeader.astro';
 import { getNoticias } from '../../lib/content';
 
 const noticias = await getNoticias();
 ---
 
 <Base title="Notícias" description="Novidades, competições e eventos da equipa.">
-  <div class="container page-header">
-    <p class="eyebrow">Notícias</p>
-    <h1>O que temos feito</h1>
-    <p>Competições, eventos, testes e tudo o que acontece na equipa.</p>
-  </div>
-  <div class="container section" style="padding-top: 1.5rem">
+  <PageHeader eyebrow="Notícias" title="O que temos feito" text="Competições, eventos, testes e tudo o que acontece na equipa." />
+
+  <div class="container section">
     {noticias.length === 0 && <p class="empty">Ainda não há notícias publicadas.</p>}
     <div class="grid">
-      {noticias.map((n) => <NewsCard {...n} />)}
+      {
+        noticias.map((n, i) => (
+          <div data-reveal style={`--delay: ${(i % 3) * 0.08}s`}>
+            <NewsCard {...n} />
+          </div>
+        ))
+      }
     </div>
   </div>
 </Base>

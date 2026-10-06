@@ -1,37 +1,48 @@
 ---
 import Base from '../layouts/Base.astro';
 import NewsCard from '../components/NewsCard.astro';
-import { getInicio, getNoticias, getPrototipos } from '../lib/content';
+import { getInicio, getNoticias, getPrototipos, getParceiros, NIVEIS_PARCEIRO } from '../lib/content';
 
 const inicio = await getInicio();
 const noticias = (await getNoticias()).slice(0, 3);
 const [atual] = await getPrototipos();
+const ordemNivel = (n: string) => NIVEIS_PARCEIRO.findIndex((x) => x.value === n);
+const parceiros = (await getParceiros()).sort(
+  (a, b) => ordemNivel(a.nivel) - ordemNivel(b.nivel) || (a.ordem ?? 10) - (b.ordem ?? 10)
+);
 ---
 
 <Base image={inicio.imagem}>
   <section class="hero">
+    {inicio.imagem && <img class="hero__bg" src={inicio.imagem} alt="" fetchpriority="high" />}
+    <div class="hero__shade" aria-hidden="true"></div>
     <div class="container hero__inner">
-      <div>
-        <h1>{inicio.titulo}</h1>
-        {inicio.subtitulo && <p class="hero__sub">{inicio.subtitulo}</p>}
-        <div class="hero__actions">
-          {inicio.botaoTexto && <a class="btn" href={inicio.botaoLink || '/equipa'}>{inicio.botaoTexto}</a>}
-          <a class="btn btn--ghost" href="/garagem">Ver protótipos</a>
-        </div>
+      <p class="eyebrow" data-reveal>Instituto Superior Técnico</p>
+      <h1 data-reveal style="--delay: 0.08s">{inicio.titulo}</h1>
+      {inicio.subtitulo && <p class="hero__sub" data-reveal style="--delay: 0.16s">{inicio.subtitulo}</p>}
+      <div class="hero__actions" data-reveal style="--delay: 0.24s">
+        {inicio.botaoTexto && <a class="btn" href={inicio.botaoLink || '/equipa'}>{inicio.botaoTexto}</a>}
+        <a class="btn btn--ghost" href="/garagem">Ver protótipos</a>
       </div>
-      {inicio.imagem ? <img class="hero__img" src={inicio.imagem} alt="" /> : <div class="hero__img placeholder-img">TFC</div>}
     </div>
+    <a class="hero__scroll" href="#conteudo" aria-label="Descer">
+      <span></span>
+    </a>
   </section>
+
+  <div id="conteudo"></div>
 
   {
     inicio.numeros.length > 0 && (
-      <section class="container stats">
-        {inicio.numeros.map((n) => (
-          <div>
-            <strong>{n.valor}</strong>
-            <span>{n.legenda}</span>
-          </div>
-        ))}
+      <section class="stats">
+        <div class="container stats__grid">
+          {inicio.numeros.map((n, i) => (
+            <div data-reveal style={`--delay: ${i * 0.08}s`}>
+              <strong>{n.valor}</strong>
+              <span>{n.legenda}</span>
+            </div>
+          ))}
+        </div>
       </section>
     )
   }
@@ -40,9 +51,14 @@ const [atual] = await getPrototipos();
     inicio.sobreTexto && (
       <section class="section">
         <div class="container about">
-          <p class="eyebrow">Sobre nós</p>
-          <h2>{inicio.sobreTitulo}</h2>
-          {inicio.sobreTexto.split(/\n\s*\n/).map((p) => <p>{p}</p>)}
+          <div data-reveal>
+            <p class="eyebrow">Sobre nós</p>
+            <h2>{inicio.sobreTitulo}</h2>
+          </div>
+          <div class="about__text" data-reveal style="--delay: 0.1s">
+            {inicio.sobreTexto.split(/\n\s*\n/).map((p) => <p>{p}</p>)}
+            <a class="link-arrow" href="/equipa">Conhece a equipa</a>
+          </div>
         </div>
       </section>
     )
@@ -50,18 +66,30 @@ const [atual] = await getPrototipos();
 
   {
     atual && (
-      <section class="section section--alt">
-        <div class="container feature">
-          {atual.imagem ? (
-            <img src={atual.imagem} alt={atual.nome} loading="lazy" />
-          ) : (
-            <div class="placeholder-img">{atual.nome}</div>
-          )}
-          <div>
+      <section class="section section--dark feature">
+        <div class="container feature__inner">
+          <div class="feature__media" data-reveal>
+            {atual.imagem ? (
+              <img src={atual.imagem} alt={atual.nome} loading="lazy" />
+            ) : (
+              <div class="placeholder-img">{atual.nome}</div>
+            )}
+          </div>
+          <div data-reveal style="--delay: 0.1s">
             <p class="eyebrow">Na garagem · {atual.ano}</p>
             <h2>{atual.nome}</h2>
             {atual.resumo && <p class="muted">{atual.resumo}</p>}
-            <a class="btn btn--ghost" href="/garagem">Conhecer os protótipos</a>
+            {atual.especificacoes.length > 0 && (
+              <dl class="feature__specs">
+                {atual.especificacoes.slice(0, 3).map((s) => (
+                  <div>
+                    <dt>{s.nome}</dt>
+                    <dd>{s.valor}</dd>
+                  </div>
+                ))}
+              </dl>
+            )}
+            <a class="btn btn--ghost" href={`/garagem#${atual.slug}`}>Conhecer o protótipo</a>
           </div>
         </div>
       </section>
@@ -72,14 +100,45 @@ const [atual] = await getPrototipos();
     noticias.length > 0 && (
       <section class="section">
         <div class="container">
-          <div class="section-head">
-            <h2>Últimas notícias</h2>
-            <a href="/noticias">Ver todas →</a>
+          <div class="section-head" data-reveal>
+            <div>
+              <p class="eyebrow">Notícias</p>
+              <h2>Últimas novidades</h2>
+            </div>
+            <a class="link-arrow" href="/noticias">Ver todas</a>
           </div>
           <div class="grid">
-            {noticias.map((n) => (
-              <NewsCard {...n} />
+            {noticias.map((n, i) => (
+              <div data-reveal style={`--delay: ${i * 0.08}s`}>
+                <NewsCard {...n} />
+              </div>
             ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    parceiros.length > 0 && (
+      <section class="section section--alt">
+        <div class="container">
+          <div class="section-head" data-reveal>
+            <div>
+              <p class="eyebrow">Parceiros</p>
+              <h2>Movidos por quem acredita</h2>
+            </div>
+            <a class="link-arrow" href="/parceiros">Todos os parceiros</a>
+          </div>
+          <div class="partners" data-reveal>
+            {parceiros.map((p) => {
+              const Tag = p.website ? 'a' : 'div';
+              return (
+                <Tag class="partner" href={p.website || undefined} target={p.website ? '_blank' : undefined} rel="noopener noreferrer" title={p.nome}>
+                  {p.logo ? <img src={p.logo} alt={p.nome} loading="lazy" /> : <span>{p.nome}</span>}
+                </Tag>
+              );
+            })}
           </div>
         </div>
       </section>
@@ -89,87 +148,230 @@ const [atual] = await getPrototipos();
 
 <style>
   .hero {
-    padding-block: clamp(3rem, 8vw, 6rem);
-    background: radial-gradient(1200px 400px at 80% 0%, var(--accent-soft), transparent 70%);
+    position: relative;
+    min-height: min(calc(100svh - var(--header-h)), 860px);
+    display: flex;
+    align-items: flex-end;
+    padding-block: clamp(4rem, 12vw, 8rem) clamp(4.5rem, 10vw, 7rem);
+    background:
+      radial-gradient(900px 500px at 85% 15%, rgb(0 160 223 / 0.28), transparent 70%),
+      linear-gradient(180deg, var(--dark-2), var(--dark));
+    color: var(--on-dark);
+    overflow: hidden;
+    isolation: isolate;
   }
-  .hero__inner {
-    display: grid;
-    grid-template-columns: 1.1fr 1fr;
-    gap: clamp(2rem, 5vw, 4rem);
-    align-items: center;
+  .hero__bg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: -2;
+    animation: hero-zoom 14s ease-out both;
+  }
+  .hero__shade {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      linear-gradient(90deg, rgb(11 15 18 / 0.85) 0%, rgb(11 15 18 / 0.35) 60%, transparent),
+      linear-gradient(0deg, rgb(11 15 18 / 0.9) 0%, transparent 55%);
+  }
+  .hero__inner h1 {
+    max-width: 14ch;
+    font-size: clamp(2.8rem, 8vw, 6rem);
+    line-height: 0.95;
+    margin-bottom: 0.4em;
   }
   .hero__sub {
-    font-size: 1.2rem;
-    color: var(--ink-soft);
-    max-width: 50ch;
+    font-size: clamp(1.05rem, 2vw, 1.3rem);
+    color: var(--on-dark-soft);
+    max-width: 52ch;
+    margin: 0;
   }
   .hero__actions {
     display: flex;
     flex-wrap: wrap;
     gap: 0.75rem;
-    margin-top: 1.5rem;
+    margin-top: 2.25rem;
   }
-  .hero__img {
-    border-radius: calc(var(--radius) * 1.5);
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    width: 100%;
+  .hero__scroll {
+    position: absolute;
+    left: 50%;
+    bottom: 1.75rem;
+    width: 26px;
+    height: 42px;
+    margin-left: -13px;
+    border: 1.5px solid rgb(255 255 255 / 0.4);
+    border-radius: 999px;
   }
+  .hero__scroll span {
+    position: absolute;
+    left: 50%;
+    top: 8px;
+    width: 3px;
+    height: 8px;
+    margin-left: -1.5px;
+    border-radius: 2px;
+    background: var(--on-dark);
+    animation: scroll-dot 1.8s ease-in-out infinite;
+  }
+  @keyframes hero-zoom {
+    from {
+      transform: scale(1.08);
+    }
+  }
+  @keyframes scroll-dot {
+    0% {
+      opacity: 0;
+      transform: translateY(0);
+    }
+    40% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(14px);
+    }
+  }
+
   .stats {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 1rem;
-    padding-block: 1rem;
+    background: var(--accent);
+    color: #fff;
   }
-  .stats div {
+  .stats__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  }
+  .stats__grid div {
     display: flex;
     flex-direction: column;
-    padding: 1.25rem;
-    border-radius: var(--radius);
-    background: var(--bg-alt);
+    padding: clamp(1.75rem, 4vw, 2.75rem) 1.5rem;
+    border-left: 1px solid rgb(255 255 255 / 0.25);
+  }
+  .stats__grid div:first-child {
+    border-left: 0;
+    padding-left: 0;
   }
   .stats strong {
-    font-size: 2rem;
-    color: var(--accent);
-    line-height: 1.1;
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 5vw, 3.6rem);
+    line-height: 1;
   }
   .stats span {
-    color: var(--ink-soft);
+    margin-top: 0.5rem;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    font-weight: 600;
+    opacity: 0.85;
   }
+
   .about {
-    max-width: 760px;
-  }
-  .about p:not(.eyebrow) {
-    font-size: 1.1rem;
-    color: var(--ink-soft);
-  }
-  .feature {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: clamp(2rem, 5vw, 4rem);
+    grid-template-columns: 1fr 1.3fr;
+    gap: clamp(2rem, 6vw, 6rem);
+  }
+  .about h2 {
+    font-size: clamp(2.2rem, 5vw, 3.8rem);
+  }
+  .about__text p {
+    font-size: clamp(1.1rem, 1.6vw, 1.3rem);
+    color: var(--ink-soft);
+    margin: 0 0 1.25rem;
+  }
+  .about__text p:first-child {
+    color: var(--ink);
+  }
+  .about__text .link-arrow {
+    display: inline-block;
+    margin-top: 0.75rem;
+  }
+
+  .feature__inner {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: clamp(2rem, 6vw, 5rem);
     align-items: center;
   }
-  .feature img,
-  .feature .placeholder-img {
-    border-radius: var(--radius);
-    aspect-ratio: 16 / 10;
-    object-fit: cover;
+  .feature__media img,
+  .feature__media .placeholder-img {
     width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-radius: var(--radius);
   }
-  .section-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 1rem;
-    margin-bottom: 1.5rem;
+  .feature__specs {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin: 2rem 0;
+    border-top: 1px solid var(--dark-line);
   }
-  .section-head h2 {
-    margin: 0;
+  .feature__specs div {
+    padding: 1rem 1rem 0 0;
   }
+  .feature__specs dt {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--on-dark-soft);
+  }
+  .feature__specs dd {
+    margin: 0.25rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    font-weight: 700;
+  }
+
+  .partners {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    padding: 0 1px 1px 0;
+  }
+  .partner {
+    border: 1px solid var(--line);
+    margin: 0 -1px -1px 0;
+    display: grid;
+    place-items: center;
+    aspect-ratio: 3 / 2;
+    padding: 1.5rem;
+    background: var(--bg);
+    color: var(--ink);
+    font-weight: 700;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.2s;
+  }
+  .partner img {
+    max-height: 64px;
+    width: auto;
+    object-fit: contain;
+    filter: grayscale(1);
+    opacity: 0.75;
+    transition: filter 0.3s, opacity 0.3s;
+  }
+  a.partner:hover {
+    background: var(--bg-alt);
+  }
+  a.partner:hover img {
+    filter: none;
+    opacity: 1;
+  }
+
   @media (max-width: 820px) {
-    .hero__inner,
-    .feature {
+    .about,
+    .feature__inner {
       grid-template-columns: 1fr;
+    }
+    .stats__grid div {
+      padding-left: 1.25rem;
+    }
+    .stats__grid div:nth-child(odd) {
+      border-left: 0;
+      padding-left: 0;
+    }
+    .hero__scroll {
+      display: none;
     }
   }
 </style>

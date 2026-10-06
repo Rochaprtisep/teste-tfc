@@ -1,6 +1,6 @@
 import { defineArrayMember, defineField, defineType } from 'sanity';
 import { DEPARTAMENTOS, NIVEIS_PARCEIRO } from '../listas';
-import { imagem, textoRico } from './campos';
+import { imagem, semUploadPendente, textoRico } from './campos';
 
 const nomeDe = (lista: readonly { title: string; value: string }[], value?: string) =>
   lista.find((x) => x.value === value)?.title;
@@ -121,7 +121,7 @@ export const prototipo = defineType({
       name: 'galeria',
       title: 'Galeria',
       type: 'array',
-      of: [defineArrayMember({ type: 'image', options: { hotspot: true } })],
+      of: [defineArrayMember({ type: 'image', options: { hotspot: true }, validation: semUploadPendente })],
       options: { layout: 'grid' },
     }),
     textoRico('descricao', 'Descrição'),

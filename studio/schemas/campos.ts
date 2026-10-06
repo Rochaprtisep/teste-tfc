@@ -1,4 +1,8 @@
-import { defineArrayMember, defineField } from 'sanity';
+import { defineArrayMember, defineField, type ImageRule } from 'sanity';
+
+// Impede publicar enquanto a imagem ainda está a carregar (deixava o documento corrompido).
+export const semUploadPendente = (r: ImageRule) =>
+  r.custom((v) => (v && '_upload' in v ? 'Espera que a imagem acabe de carregar antes de publicar.' : true));
 
 export const imagem = (name: string, title: string, description?: string) =>
   defineField({
@@ -7,6 +11,7 @@ export const imagem = (name: string, title: string, description?: string) =>
     description,
     type: 'image',
     options: { hotspot: true },
+    validation: semUploadPendente,
   });
 
 // Texto formatado: parágrafos, títulos, listas, links e imagens.
@@ -28,6 +33,7 @@ export const textoRico = (name: string, title: string) =>
       defineArrayMember({
         type: 'image',
         options: { hotspot: true },
+        validation: semUploadPendente,
         fields: [defineField({ name: 'alt', title: 'Descrição da imagem', type: 'string' })],
       }),
     ],

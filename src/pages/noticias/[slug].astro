@@ -1,15 +1,14 @@
 ---
 import Base from '../../layouts/Base.astro';
-import { reader, renderMarkdoc, formatDate } from '../../lib/content';
+import { getNoticias, renderRico, formatDate, type Noticia } from '../../lib/content';
 
 export async function getStaticPaths() {
-  const slugs = await reader.collections.noticias.list();
-  return slugs.map((slug) => ({ params: { slug } }));
+  const noticias = await getNoticias();
+  return noticias.map((noticia) => ({ params: { slug: noticia.slug }, props: { noticia } }));
 }
 
-const { slug } = Astro.params;
-const noticia = await reader.collections.noticias.readOrThrow(slug!);
-const html = renderMarkdoc((await noticia.conteudo()).node);
+const { noticia } = Astro.props as { noticia: Noticia };
+const html = renderRico(noticia.conteudo);
 ---
 
 <Base title={noticia.titulo} description={noticia.resumo} image={noticia.capa}>

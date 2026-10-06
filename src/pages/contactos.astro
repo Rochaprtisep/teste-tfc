@@ -1,9 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
-import { reader, getDefinicoes } from '../lib/content';
+import { getDefinicoes, getContactos } from '../lib/content';
 
 const site = await getDefinicoes();
-const c = await reader.singletons.contactos.readOrThrow();
+const c = await getContactos();
 
 const redes = [
   { label: 'Instagram', href: site.instagram },

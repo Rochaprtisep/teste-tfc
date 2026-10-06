@@ -1,12 +1,11 @@
 ---
 import Base from '../layouts/Base.astro';
 import NewsCard from '../components/NewsCard.astro';
-import { reader, getNoticias } from '../lib/content';
+import { getInicio, getNoticias, getPrototipos } from '../lib/content';
 
-const inicio = await reader.singletons.inicio.readOrThrow();
+const inicio = await getInicio();
 const noticias = (await getNoticias()).slice(0, 3);
-const prototipos = (await reader.collections.prototipos.all()).sort((a, b) => b.entry.ano - a.entry.ano);
-const atual = prototipos[0];
+const [atual] = await getPrototipos();
 ---
 
 <Base image={inicio.imagem}>
@@ -53,15 +52,15 @@ const atual = prototipos[0];
     atual && (
       <section class="section section--alt">
         <div class="container feature">
-          {atual.entry.imagem ? (
-            <img src={atual.entry.imagem} alt={atual.entry.nome} loading="lazy" />
+          {atual.imagem ? (
+            <img src={atual.imagem} alt={atual.nome} loading="lazy" />
           ) : (
-            <div class="placeholder-img">{atual.entry.nome}</div>
+            <div class="placeholder-img">{atual.nome}</div>
           )}
           <div>
-            <p class="eyebrow">Na garagem · {atual.entry.ano}</p>
-            <h2>{atual.entry.nome}</h2>
-            {atual.entry.resumo && <p class="muted">{atual.entry.resumo}</p>}
+            <p class="eyebrow">Na garagem · {atual.ano}</p>
+            <h2>{atual.nome}</h2>
+            {atual.resumo && <p class="muted">{atual.resumo}</p>}
             <a class="btn btn--ghost" href="/garagem">Conhecer os protótipos</a>
           </div>
         </div>
@@ -79,7 +78,7 @@ const atual = prototipos[0];
           </div>
           <div class="grid">
             {noticias.map((n) => (
-              <NewsCard slug={n.slug} {...n.entry} />
+              <NewsCard {...n} />
             ))}
           </div>
         </div>

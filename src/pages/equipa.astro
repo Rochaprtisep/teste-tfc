@@ -1,11 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
-import { reader, getDefinicoes, DEPARTAMENTOS } from '../lib/content';
+import { getDefinicoes, getMembros, DEPARTAMENTOS } from '../lib/content';
 
 const site = await getDefinicoes();
-const membros = (await reader.collections.membros.all())
-  .map((m) => m.entry)
-  .filter((m) => m.epoca.trim() === site.epocaAtual.trim());
+const membros = (await getMembros()).filter((m) => m.epoca.trim() === site.epocaAtual.trim());
 
 const grupos = DEPARTAMENTOS.map((d) => ({
   ...d,
@@ -36,7 +34,7 @@ const iniciais = (nome: string) =>
     {
       grupos.map((g) => (
         <section class="dept">
-          <h2>{g.label}</h2>
+          <h2>{g.title}</h2>
           <div class="grid" style="--min: 190px">
             {g.membros.map((m) => (
               <article class="member">

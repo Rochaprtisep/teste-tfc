@@ -1,9 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
-import { reader, getDefinicoes, NIVEIS_PARCEIRO } from '../lib/content';
+import { getDefinicoes, getParceiros, NIVEIS_PARCEIRO } from '../lib/content';
 
 const site = await getDefinicoes();
-const parceiros = (await reader.collections.parceiros.all()).map((p) => p.entry);
+const parceiros = await getParceiros();
 
 const niveis = NIVEIS_PARCEIRO.map((n) => ({
   ...n,
@@ -25,7 +25,7 @@ const niveis = NIVEIS_PARCEIRO.map((n) => ({
     {
       niveis.map((n) => (
         <section class={`tier tier--${n.value}`}>
-          <h2>{n.label}</h2>
+          <h2>{n.title}</h2>
           <div class="logos">
             {n.parceiros.map((p) => {
               const Tag = p.website ? 'a' : 'div';

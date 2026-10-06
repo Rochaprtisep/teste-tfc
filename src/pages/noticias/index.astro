@@ -15,7 +15,7 @@ const noticias = await getNoticias();
   <div class="container section" style="padding-top: 1.5rem">
     {noticias.length === 0 && <p class="empty">Ainda não há notícias publicadas.</p>}
     <div class="grid">
-      {noticias.map((n) => <NewsCard slug={n.slug} {...n.entry} />)}
+      {noticias.map((n) => <NewsCard {...n} />)}
     </div>
   </div>
 </Base>

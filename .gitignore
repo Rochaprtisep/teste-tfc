@@ -6,10 +6,9 @@ dist/
 .astro/
 .wrangler/
 
-# Variáveis de ambiente (tokens do Keystatic/GitHub, etc.)
+# Variáveis de ambiente
 .env
 .env.*
-!.env.example
 .dev.vars*
 
 # Logs

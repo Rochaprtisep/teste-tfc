@@ -1,7 +1,7 @@
 # Site da TFC
 
-Site estático em [Astro](https://astro.build), com o conteúdo gerido pelo [Keystatic](https://keystatic.com).
-Não tem base de dados nem servidor: o build gera HTML puro em `dist/`.
+Site estático em [Astro](https://astro.build), com o conteúdo gerido no [Sanity](https://www.sanity.io).
+O build vai buscar o conteúdo ao Sanity e gera HTML puro em `dist/`.
 
 ## Começar
 
@@ -11,67 +11,45 @@ npm run dev
 ```
 
 - Site: http://127.0.0.1:4321
-- Painel de edição: http://127.0.0.1:4321/keystatic
+- Painel de edição (Studio) online: https://tfcell.sanity.studio
+- Studio no teu computador: `npm run studio` (http://localhost:3333). Na primeira vez: `cd studio && npx npm@10 install`.
 
-`npm run build` gera o site final em `dist/`.
+`npm run build` gera o site final em `dist/`. O conteúdo vem sempre do Sanity, também em `npm run dev`: depois de publicar no Studio, recarrega a página.
+
+👉 **Configuração do Sanity, acesso de editores e problemas comuns: [SANITY.md](SANITY.md).**
 
 ## Onde está cada coisa
 
 | O quê | Onde |
 | --- | --- |
-| Conteúdo (textos, membros, notícias…) | `src/content/` (ficheiros `.yaml` / `.mdoc`, editados pelo painel) |
-| Imagens carregadas no painel | `public/images/<secção>/` |
-| Campos do painel (o que se pode editar) | `keystatic.config.ts` |
+| Conteúdo (textos, membros, notícias…) | No Sanity, editado no Studio |
+| Campos do painel (o que se pode editar) | `studio/schemas/` |
+| ID do projeto Sanity | `studio/env.ts` |
+| Como o site lê o conteúdo | `src/lib/content.ts` |
 | Páginas | `src/pages/` |
 | Cores e estilos globais | `src/styles/global.css` (variáveis no topo, ex. `--accent`) |
 
 ### Mudar de época
 
-1. Painel → **Definições gerais** → alterar **Época atual** (ex.: `2026/27`).
+1. Studio → **Definições gerais** → alterar **Época atual** (ex.: `2026/27`) → **Publicar**.
 2. Adicionar os novos membros com essa época.
 
 Os membros de épocas anteriores ficam guardados mas deixam de aparecer na página Equipa.
 
 ### Departamentos e níveis de parceiro
 
-As listas estão em `keystatic.config.ts` (`DEPARTAMENTOS`, `NIVEIS_PARCEIRO`). A ordem nessa lista é a ordem no site.
+As listas estão em `studio/listas.ts` (`DEPARTAMENTOS`, `NIVEIS_PARCEIRO`). A ordem nessa lista é a ordem no site.
+Depois de mudar, faz `npx sanity deploy` dentro de `studio/` para o Studio online mostrar as opções novas.
 
-## Publicação e painel online
+## Publicação
 
-O site é pré-renderizado (HTML estático) e alojado no **Cloudflare Workers**.
-Só o painel (`/keystatic` e `/api/keystatic/*`) corre como código no servidor.
+O site é pré-renderizado (HTML estático) e alojado no **Cloudflare Workers**. É reconstruído:
 
-- Em `npm run dev`, o painel edita os **ficheiros locais**.
-- Em produção, o painel grava no **GitHub** (`Rochaprtisep/teste-tfc`). Cada "Guardar" cria um commit, e o Cloudflare reconstrói o site.
+- a cada push para `main`;
+- a cada publicação no Studio (webhook do Sanity, ver [SANITY.md](SANITY.md)).
 
-### 1. Criar a GitHub App (uma vez)
+### Notas de manutenção
 
-1. Fazer push do projeto para o GitHub.
-2. Criar um ficheiro `.env` com `PUBLIC_KEYSTATIC_GITHUB=true` e (re)iniciar `npm run dev`.
-3. Abrir http://127.0.0.1:4321/keystatic e seguir o assistente:
-   - dar um nome à app (ex.: `tfc-keystatic`);
-   - indicar o URL de produção, para registar o callback do login;
-   - criar a app no GitHub.
-   O assistente acrescenta ao `.env` as chaves `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET`, `KEYSTATIC_SECRET` e `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`.
-4. Reiniciar `npm run dev`, instalar a app no repositório (o painel mostra o link) e fazer login.
-
-O `.env` nunca vai para o Git. Guarda estas chaves num sítio seguro.
-
-### 2. Ligar ao Cloudflare
-
-1. No Cloudflare: **Workers & Pages → Create → Import a repository** e escolher o repositório.
-2. Build command: `npm run build` · Deploy command: `npx wrangler deploy`.
-3. Em **Settings → Variables and Secrets**:
-   - `PUBLIC_KEYSTATIC_GITHUB_APP_SLUG`, como variável de **build**;
-   - `KEYSTATIC_GITHUB_CLIENT_ID`, `KEYSTATIC_GITHUB_CLIENT_SECRET` e `KEYSTATIC_SECRET`, como **secrets** do Worker (runtime).
-4. Se o URL final mudar (domínio próprio), acrescentar na GitHub App o callback
-   `https://<domínio>/api/keystatic/github/oauth/callback`.
-
-### 3. Domínio
-
-Pedir à DSI do Técnico um registo CNAME de `tfcell.tecnico.ulisboa.pt` para o Worker.
-
-### Dar acesso a editores
-
-Cada editor precisa de uma conta GitHub com acesso de escrita ao repositório: **Settings → Collaborators**. Para editar, entra em `https://<domínio>/keystatic`.
-
+- O Cloudflare usa **npm 10**. Para instalar ou atualizar pacotes, usa `npx npm@10 install <pacote>`. Se usares o npm 11, o `package-lock.json` pode ficar incompatível e o build falha.
+- A pasta `studio/` tem o seu próprio `package.json` e não entra no build do site.
+- Domínio: pedir à DSI do Técnico um registo CNAME de `tfcell.tecnico.ulisboa.pt` para o Worker.

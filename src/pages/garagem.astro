@@ -1,16 +1,8 @@
 ---
 import Base from '../layouts/Base.astro';
-import { reader, renderMarkdoc } from '../lib/content';
+import { getPrototipos, renderRico } from '../lib/content';
 
-const prototipos = await Promise.all(
-  (await reader.collections.prototipos.all())
-    .sort((a, b) => b.entry.ano - a.entry.ano)
-    .map(async (p) => ({
-      slug: p.slug,
-      ...p.entry,
-      html: renderMarkdoc((await p.entry.descricao()).node),
-    }))
-);
+const prototipos = (await getPrototipos()).map((p) => ({ ...p, html: renderRico(p.descricao) }));
 ---
 
 <Base title="Garagem" description="Os protótipos desenvolvidos pela equipa ao longo dos anos.">
@@ -29,9 +21,9 @@ const prototipos = await Promise.all(
             {p.imagem ? <img src={p.imagem} alt={p.nome} loading="lazy" /> : <div class="placeholder-img">{p.nome}</div>}
             {p.galeria.length > 0 && (
               <div class="gallery">
-                {p.galeria.filter(Boolean).map((src) => (
-                  <a href={src!} target="_blank">
-                    <img src={src!} alt="" loading="lazy" />
+                {p.galeria.map((src) => (
+                  <a href={src} target="_blank">
+                    <img src={`${src}?w=400&h=400&fit=crop&auto=format`} alt="" loading="lazy" />
                   </a>
                 ))}
               </div>
